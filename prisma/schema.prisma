@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// This is your Prisma schema file
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id               String          @id @default(cuid())
+  email            String          @unique
+  name             String?
+  password         String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  emailVerified    DateTime?
+  verificationCode String? // Added for email verification
+  redditAccounts   RedditAccount[]
+  scheduledPosts   ScheduledPost[]
+  aiComments       Comment[]
+}
+
+model RedditAccount {
+  id             String          @id @default(cuid())
+  username       String          @unique
+  karma          Int             @default(0)
+  posts          Int             @default(0)
+  commentCount   Int             @default(0) // Renamed from comments to avoid conflict
+  status         String          @default("active") // active, inactive
+  lastActive     DateTime        @default(now())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  scheduledPosts ScheduledPost[]
+  aiComments     Comment[] // Renamed from comments to avoid conflict
+}
+
+model ScheduledPost {
+  id           String        @id @default(cuid())
+  title        String
+  content      String
+  subreddit    String
+  scheduledFor DateTime
+  status       String        @default("pending") // pending, posted, failed
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  account      RedditAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId    String
+}
+
+model Comment {
+  id        String        @id @default(cuid())
+  postUrl   String
+  subreddit String
+  content   String
+  status    String        @default("pending") // pending, posted, failed
+  upvotes   Int           @default(0)
+  replies   Int           @default(0)
+  tone      String? // Added for AI comment generation
+  style     String? // Added for AI comment generation
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  account   RedditAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId String
+}
+
+model Analytics {
+  id                 String   @id @default(cuid())
+  date               DateTime @unique @default(now()) // Added unique constraint
+  totalEngagement    Int      @default(0)
+  activeSubreddits   Int      @default(0)
+  commentSuccessRate Float    @default(0)
+  avgResponseTime    Float    @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model SubredditMetrics {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  posts       Int      @default(0)
+  engagement  Int      @default(0)
+  growth      Float    @default(0)
+  lastUpdated DateTime @default(now()) // Added for tracking last metric update
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
