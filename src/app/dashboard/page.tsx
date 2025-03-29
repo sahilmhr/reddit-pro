@@ -1,3 +1,4 @@
+import { authOptions } from "@/configs/auth-options";
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -6,6 +7,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { getServerSession } from "next-auth";
 
 const stats = [
   {
@@ -69,7 +71,8 @@ const recentActivity = [
   },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

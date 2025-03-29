@@ -32,6 +32,8 @@ model RedditAccount {
   posts          Int             @default(0)
   commentCount   Int             @default(0) // Renamed from comments to avoid conflict
   status         String          @default("active") // active, inactive
+  accessToken    String?
+  refreshToken   String?
   lastActive     DateTime        @default(now())
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt

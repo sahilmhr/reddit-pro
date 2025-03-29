@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+const ENVIRONMENT = process.env.ENVIRONMENT;
+
 export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json();
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
     }
 
     // Generate verification code
-    const verificationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const verificationCode = ENVIRONMENT === "development" ? "1234" : Math.random().toString(36).substring(2, 8).toUpperCase();
 
     // Hash password
     const hashedPassword = await hash(password, 12);
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
       data: {
         name,
         email,
-        password: hashedPassword,
+        password: ENVIRONMENT === "development" ? "1234" : hashedPassword,
         verificationCode,
       },
     });
